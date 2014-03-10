@@ -1,0 +1,1 @@
+Synfast is a fast and lightweight syntax highlighter created through the Qt5 framework. It is capable of being configured for custom syntaxes through a .tax xml file. To-do: Add grammar definition for .tax file
