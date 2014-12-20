@@ -34,7 +34,7 @@ void MainWindow::on_actionOpen_triggered()
         QMessageBox::critical( this, QString("Error"), QString("There was an error opening file: %1").arg(fileName) );
     }
 
-    lastFile = fileName;  // We save the fileName in a member field so that we can retrieve it later for the File->Save option
+    this->lastFile = fileName;  // We save the fileName in a member field so that we can retrieve it later for the File->Save option
 }
 
 void MainWindow::on_actionSave_As_triggered()
@@ -52,7 +52,7 @@ void MainWindow::on_actionSave_As_triggered()
         QMessageBox::critical(this, QString("Error"), QString("There was an erro saving file: %1").arg(fileName));
     }
 
-    lastFile = fileName;  // We save the fileName in a member field so that we can retrieve it later for the File->Save option
+    this->lastFile = fileName;  // We save the fileName in a member field so that we can retrieve it later for the File->Save option
 }
 
 void MainWindow::on_actionSave_triggered()

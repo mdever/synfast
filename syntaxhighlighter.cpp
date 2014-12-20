@@ -37,16 +37,16 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* textDocument, MainWindow *ma
      * share the same formatting.                                               *
      ***************************************************************************/
     QStringList keywordList;
-    keywordList <<  "\\bchar\\b" << "\\bclass\\b" << "\\bconst\\b"
-                 << "\\bdouble\\b" << "\\benum\\b" << "\\bexplicit\\b"
-                 << "\\bfriend\\b" << "\\binline\\b" << "\\bint\\b"
-                 << "\\blong\\b" << "\\bnamespace\\b" << "\\boperator\\b"
-                 << "\\bprivate\\b" << "\\bprotected\\b" << "\\bpublic\\b"
-                 << "\\bshort\\b" << "\\bsignals\\b" << "\\bsigned\\b"
-                 << "\\bslots\\b" << "\\bstatic\\b" << "\\bstruct\\b"
-                 << "\\btemplate\\b" << "\\btypedef\\b" << "\\btypename\\b"
-                 << "\\bunion\\b" << "\\bunsigned\\b" << "\\bvirtual\\b"
-                 << "\\bvoid\\b" << "\\bvolatile\\b";
+    keywordList  << "\\bchar\\b"     << "\\bclass\\b"     << "\\bconst\\b"
+                 << "\\bdouble\\b"   << "\\benum\\b"      << "\\bexplicit\\b"
+                 << "\\bfriend\\b"   << "\\binline\\b"    << "\\bint\\b"
+                 << "\\blong\\b"     << "\\bnamespace\\b" << "\\boperator\\b"
+                 << "\\bprivate\\b"  << "\\bprotected\\b" << "\\bpublic\\b"
+                 << "\\bshort\\b"    << "\\bsignals\\b"   << "\\bsigned\\b"
+                 << "\\bslots\\b"    << "\\bstatic\\b"    << "\\bstruct\\b"
+                 << "\\btemplate\\b" << "\\btypedef\\b"   << "\\btypename\\b"
+                 << "\\bunion\\b"    << "\\bunsigned\\b"  << "\\bvirtual\\b"
+                 << "\\bvoid\\b"     << "\\bvolatile\\b";
 
 
     /*******************************************************************************
@@ -143,67 +143,17 @@ void SyntaxHighlighter::changeSyntax(QString fileName) {
     if(!file.open(QIODevice::ReadOnly))
         QMessageBox::critical(m_MainWindow, QString("Error"), QString("Could not open syntax template %1").arg(fileName), QMessageBox::Ok);
 
-    QXmlStreamReader xmlReader(&file);
-    QXmlStreamReader::TokenType token = xmlReader.readNext();
-    if(token == QXmlStreamReader::StartDocument)
-        token = xmlReader.readNext();                                                      // Skip StartDocument token
+    QByteArray   jsonByteArray = file.readAll();
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonByteArray);
 
-    if((token != QXmlStreamReader::StartElement) || (xmlReader.name() != "template")) {    // At this point, if we're not at a StartElement, something is wrong with the file
-        QMessageBox::critical(m_MainWindow, QString("XML Error"), QString("There was an error parsing the XML file. Please verify that the file is well formed"), QMessageBox::Ok);
-        file.close();
-        return;
-    }
+    /******************************************************************************************/
+    /* At this point, we have a json document of user defined rules. Need to extract data and */
+    /* put it in to the QVector<SyntaxHighlighter::Rule> rulesList                            */
+    /******************************************************************************************/
 
-    /******************************************/
+    tempRulesList = getRules(jsonDocument);
 
-    xmlReader.readNextStartElement();                                   // <rule color="red" style="bold">
 
-    // Begin parsing loop - We should be at a <rule> StartElement right now
-    while( !xmlReader.atEnd() && !xmlReader.hasError() ) {
-
-        QXmlStreamReader::TokenType currentToken = xmlReader.tokenType();
-
-        // Empty out the tempRule struct
-        tempRule.format = QTextCharFormat();
-        tempRule.regEx = QRegExp();
-
-        if(xmlReader.name() == "rule") {
-            try {tempRule.format = getFormat(xmlReader); } catch(QXmlStreamReader::Error e) { QMessageBox::critical( m_MainWindow, QString("Parse Error"), QString("Error extracting rule format"), QMessageBox::Ok); }
-        }
-
-        xmlReader.readNext();                                           // <rule>WE ARE HERE</rule>
-        xmlReader.readNext();
-
-        if(xmlReader.tokenType() == QXmlStreamReader::Characters) {
-            tempRule.regEx = QRegExp(xmlReader.text().toString());
-        }
-
-        if(tempRule.format.isValid() && tempRule.regEx.isValid() && !tempRule.regEx.isEmpty()) {
-            tempRulesList.append(tempRule);
-        }
-
-        xmlReader.readNextStartElement();
-
-    } // End while
-
-    if(xmlReader.hasError()) {
-            QMessageBox::critical( m_MainWindow, QString("Error"), QString("Error parsing file %1: %2").arg(fileName, xmlReader.errorString()), QMessageBox::Ok);
-    }
-
-    foreach(Rule _rule, tempRulesList) {
-        QMessageBox::information( m_MainWindow, QString("New Rule"), QString("Rule created: %1").arg(_rule.regEx.pattern()), QMessageBox::Ok );
-    }
-
-    /*****************************************/
-
-    if(tempRulesList.isEmpty())
-        QMessageBox::critical(m_MainWindow, QString("Error"), QString("Something is wrong"), QMessageBox::Ok);
-
-    rulesList.clear();
-    rulesList = tempRulesList;
-
-    QMessageBox::information(m_MainWindow, QString("Message"), QString("The Rules list has %1 rules").arg(rulesList.length()), QMessageBox::Ok);
-    file.close();
 }
 
 
@@ -270,4 +220,21 @@ int SyntaxHighlighter::str2int(QString str) {
         i += a.unicode();
     }
     return i;
+}
+
+/****************************************************************************
+* I wanted to keep this code to get the syntax rules seperated from the     *
+* rest of the code to keep it uncluttered. This is a private method called  *
+* from within the changeSyntax() method which accepts the JSON config file  *
+* and returns a vector of the new rules.                                    *
+****************************************************************************/
+
+QVector<SyntaxHighlighter::Rule>& SyntaxHighlighter::getRules(const QJsonDocument& jsonDoc) {
+    QJsonObject jsonObject = jsonDoc.object();
+    QStringList keys = jsonObject.keys();
+
+    Rule rule;
+    QVector<Rule> rulesVector;
+    rulesVector.append(rule);
+    return rulesVector;
 }

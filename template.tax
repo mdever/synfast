@@ -1,9 +1,4 @@
-<?xml version="1.0" encoding="ASCII"?>
-<template>
-  <rule color="blue" style="bold">
-      <pattern>\\bHello\\b</pattern>
-  </rule>
-  <rule color="light-gray" style="normal">
-     <pattern>Test</pattern>
-  </rule>
-</template> 
+{
+ "comment": { pattern: "//[^\n]*" font: "bold", color: "green" },
+  "custom": { pattern: "hello", font: "italic", color: "grey" }
+}

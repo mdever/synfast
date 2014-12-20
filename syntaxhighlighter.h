@@ -11,6 +11,9 @@
 #include <QRegExp>
 #include <QVector>
 #include <QMessageBox>
+#include <QByteArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include "mainwindow.h"
 
 
@@ -40,6 +43,7 @@ private:
     MainWindow * m_MainWindow;  // SyntaxHighlighter needs a reference to the MainWindow so that it can hook in to the MainWindows signals
     QTextCharFormat getFormat(const QXmlStreamReader& xsr);
     int str2int(QString str);
+    QVector<Rule>& getRules(const QJsonDocument& jsonDoc);
 };
 
 #endif // SYNTAXHIGHLIGHTER_H
